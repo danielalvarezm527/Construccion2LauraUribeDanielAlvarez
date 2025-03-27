@@ -5,6 +5,5 @@ import app.domain.models.User;
 
 public interface UserPort {
     User findByUserId(long userId);
-    void save(User personVeterinarian);
-    void save(Person personSeller);
+    void save(User user);
 }
