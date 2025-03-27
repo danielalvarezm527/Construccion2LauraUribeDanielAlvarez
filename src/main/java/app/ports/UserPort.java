@@ -7,5 +7,4 @@ public interface UserPort {
     User findByUserId(long userId);
     void save(User personVeterinarian);
     void save(Person personSeller);
-    void edit(Person person);
 }
