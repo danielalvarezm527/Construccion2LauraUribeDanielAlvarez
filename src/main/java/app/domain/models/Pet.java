@@ -15,7 +15,7 @@ public class Pet{
 	private String species;
 	private String race;
 	private double weight;
-	private String caracteristicas ;
+	private String caracteristicas;
 
 	public Pet(String name, Person owner, int age, long petId, String species, String race, double weight, String caracteristicas) {
 		this.name = name;
