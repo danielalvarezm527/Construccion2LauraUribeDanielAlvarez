@@ -3,6 +3,7 @@ package app.domain.services;
 import app.domain.models.Bill;
 import app.domain.models.MedicalRecord;
 import app.domain.models.Order;
+import app.domain.models.Pet;
 import app.ports.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 @Setter
 @Getter
@@ -29,7 +31,11 @@ public class SellerService {
             throw new Exception("La orden especificada no existe");
         }
         
-        Pet pet = petPort.findByPetId(bill.getPetId().getPetId());
+        if (existingOrder.isCancelled()) {
+            throw new Exception("No se puede vender medicamentos con una orden cancelada");
+        }
+        
+        Pet pet = petPort.findByPetId(bill.getPet().getPetId());
         if (pet == null) {
             throw new Exception("La mascota no existe en el sistema");
         }
@@ -38,7 +44,11 @@ public class SellerService {
         
         bill.setProductName(existingOrder.getMedicine());
         
-        generateBill(bill);
+        bill.setDate(new Timestamp(System.currentTimeMillis()));
+        
+        bill.setBillId(System.currentTimeMillis());
+        
+        billPort.save(bill);
     }
 
     public void sellOtherProduct(Bill bill) throws Exception {
@@ -54,16 +64,27 @@ public class SellerService {
             throw new Exception("La cantidad debe ser mayor que cero");
         }
         
+        if (bill.getPetId() != null) {
+            Pet pet = petPort.findByPetId(bill.getPetId().getPetId());
+            if (pet == null) {
+                throw new Exception("La mascota no existe en el sistema");
+            }
+        }
+        
         bill.setOrderId(null);
         
-        generateBill(bill);
+        bill.setDate(new Timestamp(System.currentTimeMillis()));
+        
+        bill.setBillId(System.currentTimeMillis());
+        
+        billPort.save(bill);
     }
-
+    
     public Bill generateBill(Bill bill) throws Exception {
-        bill.setBillId(); // Como creamos ids unicos?
+    	bill.setBillId(System.currentTimeMillis());
         
         if (bill.getDate() == null) {
-            bill.setDate(); // Como asignamos timestamp?
+        	bill.setDate(new Timestamp(System.currentTimeMillis()));
         }
         
         billPort.save(bill);

@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Setter
@@ -111,7 +112,8 @@ public class VeterinarianService {
             throw new Exception("El dueño no es dueño de esta mascota");
         }
         
-        //Como creamos el id de la orden y como asignamos fechas?
+        order.setOrderId(System.currentTimeMillis());
+        order.setDate(new Timestamp(System.currentTimeMillis()));
         
         orderPort.save(order);
     }
@@ -129,7 +131,7 @@ public class VeterinarianService {
         cancelRecord.setPet(db_order.getPet());
         cancelRecord.setVeterinarian(order.getVeterinarian());
 
-        cancelRecord.setDate(); // COMO SE HACE ESTO?
+        cancelRecord.setDate(new Timestamp(System.currentTimeMillis()));
         
         cancelRecord.setReason("Anulación de orden #" + db_order.getOrderId());
         cancelRecord.setProcedureDetails("Orden anulada por " + order.getVeterinarian().getName());

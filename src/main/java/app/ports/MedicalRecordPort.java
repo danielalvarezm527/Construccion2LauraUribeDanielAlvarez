@@ -9,5 +9,4 @@ public interface MedicalRecordPort {
     public List<MedicalRecord> findByPetId(long pet);
     public void save(MedicalRecord medicalRecord);
     public MedicalRecord findById(long medicalRecordId);
-
 }

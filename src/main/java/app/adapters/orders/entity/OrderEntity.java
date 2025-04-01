@@ -17,11 +17,23 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderEntity {
 	@Id
-	private long orderId;
-	private Pet pet;
-	private Person owner;
-	private User veterinarian;
-	private String medicine;
-	private String dose;
-	private Timestamp date;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long orderId;
+    
+    @ManyToOne
+    @JoinColumn(name = "pet_id")
+    private PetEntity pet;
+    
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private PersonEntity owner;
+    
+    @ManyToOne
+    @JoinColumn(name = "veterinarian_id")
+    private UserEntity veterinarian;
+    
+    private String medicine;
+    private String dose;
+    private Timestamp date;
+    private boolean cancelled;
 }

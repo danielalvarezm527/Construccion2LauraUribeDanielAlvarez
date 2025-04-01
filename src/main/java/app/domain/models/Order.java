@@ -27,5 +27,10 @@ public class Order{
 		this.dose = dose;
 		this.date = date;
 	}
+
+	public boolean isCancelled() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
 
