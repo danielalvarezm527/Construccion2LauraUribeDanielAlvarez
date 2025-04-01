@@ -9,7 +9,6 @@ import app.domain.models.Person;
 public interface PersonPort {
 
     public Person findByPersonId(long document);
-
     public void save(Person person);
 }
 
