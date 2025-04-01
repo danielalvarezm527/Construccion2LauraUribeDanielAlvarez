@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "persons")
+@Table(name = "Persons")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,44 +23,4 @@ public class PersonEntity {
         this.age = age;
         this.role = role;
     }
-
-	public String getRole() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public long getDocument() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void setDocument(Object document2) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setName(Object name2) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setAge(Object age2) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setRole(Object role2) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public int getAge() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }
