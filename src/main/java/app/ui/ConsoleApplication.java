@@ -239,7 +239,7 @@ public class ConsoleApplication implements CommandLineRunner{
     }
     
     private void registerVeterinarian() {
-        
+        //Pendiente: registrar veterinario
     }
 
     private void registerPet() {
