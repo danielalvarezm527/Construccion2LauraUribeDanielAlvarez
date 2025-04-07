@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 public class Person {
 	private long document;
@@ -20,22 +20,6 @@ public class Person {
 		this.role= role;
 	
 	}
-	public Object getDocument() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	public Object getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	public Object getAge() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	public Object getRole() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
+
 }
 
