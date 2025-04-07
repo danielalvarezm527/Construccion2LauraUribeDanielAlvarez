@@ -36,7 +36,7 @@ public class MedicalRecordEntity {
     private String reason;
     private String symptomatology;
     private String diagnostic;
-    private String procedure;
+    private String procedures;
     private String medicine;
     private String dose;
     private String vaccination;

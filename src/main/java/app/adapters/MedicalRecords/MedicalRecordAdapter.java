@@ -65,7 +65,7 @@ public class MedicalRecordAdapter implements MedicalRecordPort {
         entity.setReason(medicalRecord.getReason());
         entity.setSymptomatology(medicalRecord.getSymptomatology());
         entity.setDiagnostic(medicalRecord.getDiagnostic());
-        entity.setProcedure(medicalRecord.getProcedure());
+        entity.setProcedures(medicalRecord.getProcedure());
         entity.setMedicine(medicalRecord.getMedicine());
         entity.setDose(medicalRecord.getDose());
         entity.setVaccination(medicalRecord.getVaccination());

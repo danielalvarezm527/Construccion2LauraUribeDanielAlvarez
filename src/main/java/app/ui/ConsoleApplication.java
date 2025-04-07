@@ -230,8 +230,8 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.print("Contraseña: ");
             String password = scanner.nextLine();
             
-            User seller = new User(document, name, age, username, password, "Seller");
-            administratorService.registerSeller(seller);
+            User seller = new User(document, name, age, username, password, 1235,"Seller");
+            administratorService.createSeller(seller);
             System.out.println("Vendedor registrado exitosamente");
         } catch (Exception e) {
             System.out.println("Error al registrar vendedor: " + e.getMessage());

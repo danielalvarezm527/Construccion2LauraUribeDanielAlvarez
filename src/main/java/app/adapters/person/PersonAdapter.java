@@ -1,6 +1,7 @@
 package app.adapters.person;
 
 import app.adapters.person.entity.PersonEntity;
+import app.adapters.person.repository.PersonRepository;
 import app.domain.models.Person;
 import app.ports.PersonPort;
 import lombok.Getter;

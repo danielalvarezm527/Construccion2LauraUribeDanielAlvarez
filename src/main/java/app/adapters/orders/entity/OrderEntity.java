@@ -2,6 +2,9 @@ package app.adapters.orders.entity;
 
 import java.sql.Timestamp;
 
+import app.adapters.person.entity.PersonEntity;
+import app.adapters.pets.entity.PetEntity;
+import app.adapters.user.entity.UserEntity;
 import app.domain.models.Person;
 import app.domain.models.Pet;
 import app.domain.models.User;
