@@ -122,6 +122,7 @@ public class MedicalRecordAdapter implements MedicalRecordPort {
                 vetEntity.getAge(),
                 vetEntity.getUserName(),
                 vetEntity.getPassword(),
+                vetEntity.getUserId(),
                 vetEntity.getRole()
             );
         }

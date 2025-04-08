@@ -25,6 +25,21 @@ public class UserEntity{
     @Column(name ="password")
     private String password;
 
+    public long getDocument() {
+        return person.getDocument();
+    }
+
+    public String getName() {
+        return person.getName();
+    }
+
+    public int getAge() {
+        return person.getAge();
+    }
+
+    public String getRole() {
+        return person.getRole();
+    }
 }
 
 
