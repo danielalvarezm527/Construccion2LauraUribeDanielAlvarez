@@ -35,7 +35,7 @@ public class SellerService {
             throw new Exception("No se puede vender medicamentos con una orden cancelada");
         }
         
-        Pet pet = petPort.findByPetId(bill.getPet().getPetId());
+        Pet pet = petPort.findByPetId(bill.getPetId().getPetId());
         if (pet == null) {
             throw new Exception("La mascota no existe en el sistema");
         }

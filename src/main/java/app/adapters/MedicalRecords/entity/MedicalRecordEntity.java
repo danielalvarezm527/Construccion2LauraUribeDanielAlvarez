@@ -42,4 +42,8 @@ public class MedicalRecordEntity {
     private String vaccination;
     private String allergyMedication;
     private String procedureDetails;
+
+    public String getProcedure() {
+        return procedures;
+    }
 }

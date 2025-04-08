@@ -17,6 +17,9 @@ public class Order{
 	private String medicine;
 	private String dose;
 	private Timestamp date;
+	@Setter
+    @Getter
+    private boolean cancelled;
 
 	public Order(long orderId, Pet pet, Person owner, User veterinarian, String medicine, String dose, Timestamp date) {
 		this.orderId = orderId;
@@ -26,11 +29,8 @@ public class Order{
 		this.medicine = medicine;
 		this.dose = dose;
 		this.date = date;
+		this.cancelled = false;
 	}
 
-	public boolean isCancelled() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }
 
