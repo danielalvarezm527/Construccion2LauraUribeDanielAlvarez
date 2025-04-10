@@ -6,13 +6,14 @@ import app.adapters.user.entity.UserEntity;
 import app.domain.models.Person;
 import app.domain.models.User;
 import app.ports.UserPort;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
 public class UserAdapter implements UserPort {
-    @Override
-    public User findByUserId(long userId) {
-        return null;
-    }
 
     @Autowired
     private UserRepository userRepository;
@@ -41,4 +42,21 @@ public class UserAdapter implements UserPort {
         return userEntity;
     }
 
+    @Override
+    public User findByUserId(long userId) {
+        Optional<UserEntity> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            UserEntity entity = userOptional.get();
+            User user = new User();
+            user.setDocument(entity.getDocument());
+            user.setName(entity.getName());
+            user.setAge(entity.getAge());
+            user.setRole(entity.getRole());
+            user.setUserName(entity.getUserName());
+            user.setPassword(entity.getPassword());
+            user.setUserId(entity.getUserId());
+            return user;
+        }
+        return null;
+    }
 }
