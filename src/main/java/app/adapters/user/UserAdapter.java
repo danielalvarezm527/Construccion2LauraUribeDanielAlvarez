@@ -14,11 +14,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserAdapter implements UserPort {
-    
-    @Override
-    public User findByUserId(long userId) {
-        return null;
-    }
 
     @Autowired
     private UserRepository userRepository;
