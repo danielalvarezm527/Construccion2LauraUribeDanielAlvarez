@@ -20,8 +20,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderEntity {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long orderId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Make sure this is IDENTITY
+    @Column(name = "order_id")
+    private Long orderId;
     
     @ManyToOne
     @JoinColumn(name = "pet_id")

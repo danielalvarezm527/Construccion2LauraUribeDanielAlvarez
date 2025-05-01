@@ -124,7 +124,6 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.println("\n===== MENU ADMINISTRADOR =====");
             System.out.println("1. Registrar vendedor");
             System.out.println("2. Registrar veterinario");
-            System.out.println("3. Cambiar rol");
             System.out.println("0. Cerrar sesión");
             System.out.print("Seleccione una opción: ");
             
@@ -135,10 +134,6 @@ public class ConsoleApplication implements CommandLineRunner{
                     break;
                 case 2:
                     registerVeterinarian();
-                    break;
-                case 3:
-                    changeRole();
-                    back = true;
                     break;
                 case 0:
                     back = true;
@@ -159,7 +154,6 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.println("4. Anular orden médica");
             System.out.println("5. Consultar historia clínica");
             System.out.println("6. Consultar órdenes");
-            System.out.println("7. Cambiar rol");
             System.out.println("0. Cerrar sesión");
             System.out.print("Seleccione una opción: ");
             
@@ -183,10 +177,6 @@ public class ConsoleApplication implements CommandLineRunner{
                 case 6:
                     consultOrders();
                     break;
-                case 7:
-                    changeRole();
-                    back = true;
-                    break;
                 case 0:
                     back = true;
                     break;
@@ -203,7 +193,6 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.println("1. Vender medicamento por orden");
             System.out.println("2. Vender otro producto");
             System.out.println("3. Consultar órdenes");
-            System.out.println("4. Cambiar rol");
             System.out.println("0. Cerrar sesión");
             System.out.print("Seleccione una opción: ");
             
@@ -217,10 +206,6 @@ public class ConsoleApplication implements CommandLineRunner{
                     break;
                 case 3:
                     consultOrders();
-                    break;
-                case 4:
-                    changeRole();
-                    back = true;
                     break;
                 case 0:
                     back = true;
@@ -373,6 +358,7 @@ public class ConsoleApplication implements CommandLineRunner{
             medicalRecord.setVaccination(vaccination);
             medicalRecord.setAllergyMedication(allergyMedication);
             medicalRecord.setProcedureDetails(procedureDetails);
+            medicalRecord.setVeterinarian(currentUser);
             
             veterinarianService.createMedicalRecord(medicalRecord);
             System.out.println("Historia clínica creada exitosamente");
@@ -423,15 +409,9 @@ public class ConsoleApplication implements CommandLineRunner{
             
             // Crear un objeto Order con el ID para anular
             Order order = new Order();
-            order.setOrderId(orderId);
             
-            // Establecer el veterinario que anula
-            User vet = new User();
-            // Si currentUser no está disponible, crear un usuario temporal
-            vet.setDocument(123456789); // Usar una cédula válida o la del usuario actual
-            vet.setRole("Veterinarian");
-            vet.setName("Veterinario"); // Nombre genérico o usar el actual
-            order.setVeterinarian(vet);
+            // Usar el usuario actualmente logueado como veterinario
+            order.setVeterinarian(currentUser);
             
             veterinarianService.cancelOrder(order);
             System.out.println("Orden médica anulada exitosamente");
@@ -658,36 +638,6 @@ public class ConsoleApplication implements CommandLineRunner{
             return Integer.parseInt(scanner.nextLine());
         } catch (NumberFormatException e) {
             return -1; // Valor inválido
-        }
-    }
-
-    private void changeRole() {
-        System.out.println("\n===== CAMBIO DE ROL =====");
-        System.out.println("1. Administrador");
-        System.out.println("2. Veterinario");
-        System.out.println("3. Vendedor");
-        System.out.print("Seleccione un rol: ");
-        
-        int option = readIntOption();
-        try {
-            switch (option) {
-                case 1:
-                    currentRole = "Administrator";
-                    showAdministratorMenu();
-                    break;
-                case 2:
-                    currentRole = "Veterinarian";
-                    showVeterinarianMenu();
-                    break;
-                case 3:
-                    currentRole = "Seller";
-                    showSellerMenu();
-                    break;
-                default:
-                    System.out.println("Opción inválida.");
-            }
-        } catch (Exception e) {
-            System.out.println("Error al cambiar de rol: " + e.getMessage());
         }
     }
 }
