@@ -80,9 +80,23 @@ public class MedicalRecordAdapter implements MedicalRecordPort {
         }
         
         if (medicalRecord.getVeterinarian() != null) {
-            Optional<UserEntity> vetEntityOptional = userRepository.findById(medicalRecord.getVeterinarian().getDocument());
-            if (vetEntityOptional.isPresent()) {
-                entity.setVeterinarian(vetEntityOptional.get());
+            // Primero buscar por userId
+            if (medicalRecord.getVeterinarian().getUserId() > 0) {
+                Optional<UserEntity> vetEntityOptional = userRepository.findById(medicalRecord.getVeterinarian().getUserId());
+                if (vetEntityOptional.isPresent()) {
+                    entity.setVeterinarian(vetEntityOptional.get());
+                }
+            }
+            
+            // Si no se encontró por userId, buscar por document
+            if (entity.getVeterinarian() == null && medicalRecord.getVeterinarian().getDocument() > 0) {
+                List<UserEntity> users = userRepository.findAll();
+                for (UserEntity user : users) {
+                    if (user.getDocument() == medicalRecord.getVeterinarian().getDocument()) {
+                        entity.setVeterinarian(user);
+                        break;
+                    }
+                }
             }
         }
 

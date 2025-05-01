@@ -95,7 +95,6 @@ public class VeterinarianService {
         // Asignar los valores correctos
         medicalRecord.setVeterinarian(veterinarian);
         medicalRecord.setPet(pet);
-        medicalRecord.setMedicalRecordId(System.currentTimeMillis());
         
         medicalRecordPort.save(medicalRecord);
     }
@@ -202,8 +201,6 @@ public class VeterinarianService {
         cancelRecord.setReason("Anulación de orden #" + db_order.getOrderId());
         cancelRecord.setProcedureDetails("Orden anulada por " + veterinarian.getName());
         cancelRecord.setOrder(db_order);
-        
-        cancelRecord.setMedicalRecordId(System.currentTimeMillis());
         
         medicalRecordPort.save(cancelRecord);
     }

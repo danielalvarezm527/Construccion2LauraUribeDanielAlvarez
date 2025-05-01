@@ -324,6 +324,34 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.println("\n===== CREACIÓN DE HISTORIA CLÍNICA =====");
             System.out.print("ID de la mascota: ");
             long petId = Long.parseLong(scanner.nextLine());
+    
+            // Preguntar si desea asociar una orden existente
+            System.out.print("¿Desea asociar esta historia clínica a una orden médica existente? (S/N): ");
+            String hasOrder = scanner.nextLine();
+            
+            // Preparar la orden si el usuario quiere asociarla
+            Order order = null;
+            if (hasOrder.equalsIgnoreCase("S")) {
+                System.out.print("ID de la orden médica: ");
+                long orderId = Long.parseLong(scanner.nextLine());
+                
+                // Verificar que la orden existe
+                Order orderQuery = new Order();
+                orderQuery.setOrderId(orderId);
+                
+                try {
+                    order = sellerService.ConsultOrder(orderQuery);
+                    if (order == null) {
+                        System.out.println("No se encontró la orden especificada. Se creará la historia sin asociar a una orden.");
+                    } else {
+                        System.out.println("Orden encontrada: Medicamento: " + order.getMedicine() + ", Dosis: " + order.getDose());
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error al buscar la orden: " + e.getMessage() + ". Se creará la historia sin asociar a una orden.");
+                    order = null;
+                }
+            }
+    
             System.out.print("Razón de la visita: ");
             String reason = scanner.nextLine();
             System.out.print("Sintomatología: ");
@@ -360,8 +388,18 @@ public class ConsoleApplication implements CommandLineRunner{
             medicalRecord.setProcedureDetails(procedureDetails);
             medicalRecord.setVeterinarian(currentUser);
             
+            // Asociar la orden si existe
+            if (order != null) {
+                medicalRecord.setOrder(order);
+            }
+            
             veterinarianService.createMedicalRecord(medicalRecord);
-            System.out.println("Historia clínica creada exitosamente");
+            
+            if (order != null) {
+                System.out.println("Historia clínica creada exitosamente y asociada a la orden #" + order.getOrderId());
+            } else {
+                System.out.println("Historia clínica creada exitosamente");
+            }
         } catch (Exception e) {
             System.out.println("Error al crear historia clínica: " + e.getMessage());
         }
