@@ -8,6 +8,7 @@ import app.domain.models.User;
 import app.ports.UserPort;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,42 @@ public class UserAdapter implements UserPort {
         userEntity.setUserId(user.getUserId());
         userEntity.setUserName(user.getUserName());
         userEntity.setPassword(user.getPassword());
+        
+        // Crear y establecer la relación con PersonEntity
+        PersonEntity personEntity = new PersonEntity();
+        personEntity.setDocument(user.getDocument());
+        personEntity.setName(user.getName());
+        personEntity.setAge(user.getAge());
+        personEntity.setRole(user.getRole());
+        
+        userEntity.setPerson(personEntity);
         return userEntity;
+    }
+
+    @Override
+    public User findByUserNameAndPassword(String userName, String password) {
+        List<UserEntity> allUsers = userRepository.findAll();
+        
+        for (UserEntity entity : allUsers) {
+            if (entity.getUserName().equals(userName) && entity.getPassword().equals(password)) {
+                User user = new User();
+                user.setUserId(entity.getUserId());
+                user.setUserName(entity.getUserName());
+                user.setPassword(entity.getPassword());
+                
+                // Verificar que la persona no sea nula antes de acceder a sus propiedades
+                if (entity.getPerson() != null) {
+                    PersonEntity personEntity = entity.getPerson();
+                    user.setDocument(personEntity.getDocument());
+                    user.setName(personEntity.getName());
+                    user.setAge(personEntity.getAge());
+                    user.setRole(personEntity.getRole());
+                }
+                return user;
+            }
+        }
+        
+        return null;
     }
 
     @Override

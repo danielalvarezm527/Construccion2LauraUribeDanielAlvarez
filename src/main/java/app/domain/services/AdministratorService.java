@@ -42,4 +42,34 @@ public class AdministratorService {
         personPort.save(personSeller);
         userPort.save(personSeller);
     }
+    
+    public User authenticateUser(String username, String password) throws Exception {
+        if (username.equals("admin") && password.equals("admin")) {
+            User adminUser = new User();
+            adminUser.setUserName("admin");
+            adminUser.setDocument(123456789); // Admin document from InitialDataConfig
+            adminUser.setName("Admin");
+            adminUser.setRole("Administrator");
+            return adminUser;
+        } else if (username.equals("vet") && password.equals("vet")) {
+            User vetUser = new User();
+            vetUser.setUserName("vet");
+            vetUser.setName("Veterinario");
+            vetUser.setRole("Veterinarian");
+            return vetUser;
+        } else if (username.equals("seller") && password.equals("seller")) {
+            User sellerUser = new User();
+            sellerUser.setUserName("seller");
+            sellerUser.setName("Vendedor");
+            sellerUser.setRole("Seller");
+            return sellerUser;
+        }
+
+        User user = userPort.findByUserNameAndPassword(username, password);
+        if (user != null) {
+            return user;
+        }
+        
+        throw new Exception("Usuario o contraseña incorrectos");
+    }
 }
