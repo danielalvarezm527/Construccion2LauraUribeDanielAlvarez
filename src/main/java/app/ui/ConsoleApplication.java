@@ -450,6 +450,7 @@ public class ConsoleApplication implements CommandLineRunner{
             
             // Usar el usuario actualmente logueado como veterinario
             order.setVeterinarian(currentUser);
+            order.setOrderId(orderId);
             
             veterinarianService.cancelOrder(order);
             System.out.println("Orden médica anulada exitosamente");
@@ -589,7 +590,6 @@ public class ConsoleApplication implements CommandLineRunner{
             bill.setProductName(order.getMedicine());
             bill.setValue(value);
             bill.setAmount(amount);
-            bill.setDate(new Timestamp(System.currentTimeMillis()));
             
             // Vender el medicamento usando la orden y la factura
             sellerService.SellMedicine(order, bill);
@@ -653,7 +653,6 @@ public class ConsoleApplication implements CommandLineRunner{
             bill.setProductName(productName);
             bill.setValue(value);
             bill.setAmount(amount);
-            bill.setDate(new Timestamp(System.currentTimeMillis()));
             
             // Usar el método correcto para vender otro producto
             sellerService.sellOtherProduct(bill);

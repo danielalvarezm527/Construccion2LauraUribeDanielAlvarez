@@ -42,6 +42,11 @@ public class BillAdapter implements BillPort{
     @Override
     public void save(Bill bill) {
         BillEntity entity = new BillEntity();
+
+        if (bill.getBillId() > 0) {
+            entity.setBillId(bill.getBillId());
+        }
+        
         entity.setBillId(bill.getBillId());
         entity.setProductName(bill.getProductName());
         entity.setValue(bill.getValue());

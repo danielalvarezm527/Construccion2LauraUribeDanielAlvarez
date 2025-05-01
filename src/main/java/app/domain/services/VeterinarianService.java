@@ -193,6 +193,11 @@ public class VeterinarianService {
             throw new Exception("Solo un veterinario puede anular órdenes");
         }
         
+        // Marcar la orden como cancelada
+        db_order.setCancelled(true);
+        orderPort.save(db_order);
+        
+        // Crear registro médico de la anulación
         MedicalRecord cancelRecord = new MedicalRecord();
         cancelRecord.setPet(db_order.getPet());
         cancelRecord.setVeterinarian(veterinarian);
