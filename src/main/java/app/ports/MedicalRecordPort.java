@@ -1,7 +1,6 @@
 package app.ports;
 
 import app.domain.models.MedicalRecord;
-import app.domain.models.Pet;
 
 import java.util.List;
 

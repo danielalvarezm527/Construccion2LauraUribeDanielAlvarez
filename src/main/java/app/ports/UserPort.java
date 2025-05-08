@@ -1,7 +1,6 @@
 package app.ports;
 
 import java.util.List;
-import app.domain.models.Person;
 import app.domain.models.User;
 
 public interface UserPort {

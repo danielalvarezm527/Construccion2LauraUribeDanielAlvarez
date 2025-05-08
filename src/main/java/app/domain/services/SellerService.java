@@ -1,7 +1,6 @@
 package app.domain.services;
 
 import app.domain.models.Bill;
-import app.domain.models.MedicalRecord;
 import app.domain.models.Order;
 import app.domain.models.Pet;
 import app.ports.*;
@@ -12,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.List;
+
 @Setter
 @Getter
 @NoArgsConstructor

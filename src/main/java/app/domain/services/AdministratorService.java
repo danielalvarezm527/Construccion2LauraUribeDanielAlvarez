@@ -28,7 +28,7 @@ public class AdministratorService {
             throw new Exception(" Ya existe una persona con esa cédula");
         }
         personVeterinarian.setRole("Veterinarian");
-        personPort.save(personVeterinarian);
+        personPort.save(new Person(personVeterinarian.getDocument(), personVeterinarian.getName(), personVeterinarian.getAge(), personVeterinarian.getRole()));
         userPort.save(personVeterinarian);
 
     }
@@ -39,7 +39,7 @@ public class AdministratorService {
             throw new Exception(" Ya existe una persona con esa cédula");
         }
         personSeller.setRole("Seller");
-        personPort.save(personSeller);
+        personPort.save(new Person(personSeller.getDocument(), personSeller.getName(), personSeller.getAge(), personSeller.getRole()));
         userPort.save(personSeller);
     }
     
