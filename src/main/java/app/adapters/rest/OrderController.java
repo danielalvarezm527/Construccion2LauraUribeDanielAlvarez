@@ -1,5 +1,7 @@
 package app.adapters.rest;
 
+import app.adapters.rest.dto.CancelOrderRequest;
+import app.adapters.rest.dto.OrderRequest;
 import app.domain.models.Order;
 import app.domain.models.Person;
 import app.domain.models.Pet;
@@ -70,33 +72,4 @@ public class OrderController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-}
-
-// DTOs
-class OrderRequest {
-    private long petId;
-    private long ownerDocument;
-    private long veterinarianDocument;
-    private String medicine;
-    private String dose;
-
-    // Getters y setters
-    public long getPetId() { return petId; }
-    public void setPetId(long petId) { this.petId = petId; }
-    public long getOwnerDocument() { return ownerDocument; }
-    public void setOwnerDocument(long ownerDocument) { this.ownerDocument = ownerDocument; }
-    public long getVeterinarianDocument() { return veterinarianDocument; }
-    public void setVeterinarianDocument(long veterinarianDocument) { this.veterinarianDocument = veterinarianDocument; }
-    public String getMedicine() { return medicine; }
-    public void setMedicine(String medicine) { this.medicine = medicine; }
-    public String getDose() { return dose; }
-    public void setDose(String dose) { this.dose = dose; }
-}
-
-class CancelOrderRequest {
-    private long veterinarianDocument;
-
-    // Getter y setter
-    public long getVeterinarianDocument() { return veterinarianDocument; }
-    public void setVeterinarianDocument(long veterinarianDocument) { this.veterinarianDocument = veterinarianDocument; }
 }

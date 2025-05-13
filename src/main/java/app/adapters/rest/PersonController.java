@@ -1,5 +1,6 @@
 package app.adapters.rest;
 
+import app.adapters.rest.dto.PersonRequest;
 import app.domain.models.Person;
 import app.ports.PersonPort;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,19 +33,4 @@ public class PersonController {
         }
         return ResponseEntity.ok(person);
     }
-}
-
-// DTO para la petición
-class PersonRequest {
-    private long document;
-    private String name;
-    private int age;
-
-    // Getters y setters
-    public long getDocument() { return document; }
-    public void setDocument(long document) { this.document = document; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public int getAge() { return age; }
-    public void setAge(int age) { this.age = age; }
 }
