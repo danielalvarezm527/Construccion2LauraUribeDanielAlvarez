@@ -9,6 +9,8 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 @Configuration
 public class InitialDataConfig {
 
@@ -20,28 +22,53 @@ public class InitialDataConfig {
     
     @PostConstruct
     public void initData() {
-        long adminDocument = 123456789;
-        
-        if (userPort.findByUserId(adminDocument) == null) {
-            Person adminPerson = new Person();
-            adminPerson.setDocument(adminDocument);
-            adminPerson.setName("Admin");
-            adminPerson.setAge(30);
-            adminPerson.setRole("Administrator");
+        try {
+            long adminDocument = 123456789;
             
-            personPort.save(adminPerson);
+            // Verificar si ya existe un usuario con el nombre "admin"
+            boolean adminExists = false;
+            List<User> allUsers = userPort.findAll();
             
-            User admin = new User();
-            admin.setDocument(adminDocument);
-            admin.setName("Admin");
-            admin.setAge(30);
-            admin.setUserName("admin");
-            admin.setPassword("admin");
-            admin.setRole("Administrator");
+            for (User user : allUsers) {
+                if ("admin".equals(user.getUserName())) {
+                    adminExists = true;
+                    System.out.println("El usuario administrador ya existe en el sistema.");
+                    break;
+                }
+            }
             
-            userPort.save(admin);
-            
-            System.out.println("Usuarios iniciales creados exitosamente");
+            if (!adminExists) {
+                // Verificar si ya existe la persona con ese documento
+                Person existingPerson = personPort.findByPersonId(adminDocument);
+                
+                if (existingPerson == null) {
+                    Person adminPerson = new Person();
+                    adminPerson.setDocument(adminDocument);
+                    adminPerson.setName("Admin");
+                    adminPerson.setAge(30);
+                    adminPerson.setRole("Administrator");
+                    
+                    personPort.save(adminPerson);
+                } else {
+                    System.out.println("Ya existe una persona con el documento " + adminDocument);
+                }
+                
+                User admin = new User();
+                admin.setDocument(adminDocument);
+                admin.setName("Admin");
+                admin.setAge(30);
+                admin.setUserName("admin");
+                admin.setPassword("admin");
+                admin.setRole("Administrator");
+                
+                userPort.save(admin);
+                
+                System.out.println("Usuario administrador inicial creado exitosamente");
+            }
+        } catch (Exception e) {
+            // Capturar cualquier excepción para evitar que la aplicación falle al iniciar
+            System.err.println("Error al crear el usuario administrador inicial: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
