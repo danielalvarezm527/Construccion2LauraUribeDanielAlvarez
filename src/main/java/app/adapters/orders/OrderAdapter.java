@@ -1,5 +1,6 @@
 package app.adapters.orders;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,10 @@ public class OrderAdapter implements OrderPort {
     @Override
     public void save(Order order) {
         OrderEntity entity = new OrderEntity();
-        entity.setOrderId(order.getOrderId());
+        // Only set ID if it's an existing order with a valid ID
+        if (order.getOrderId() > 0) {
+            entity.setOrderId(order.getOrderId());
+        }
         entity.setMedicine(order.getMedicine());
         entity.setDose(order.getDose());
         entity.setDate(order.getDate());
@@ -74,14 +78,23 @@ public class OrderAdapter implements OrderPort {
         }
         
         if (order.getVeterinarian() != null) {
-            Optional<UserEntity> vetOptional = userRepository.findById(order.getVeterinarian().getDocument());
+            Optional<UserEntity> vetOptional = userRepository.findById(order.getVeterinarian().getUserId());
             if (vetOptional.isPresent()) {
                 entity.setVeterinarian(vetOptional.get());
+            } else if (order.getVeterinarian().getDocument() > 0) {
+                // Try finding by document if user ID doesn't work
+                List<UserEntity> users = userRepository.findAll();
+                for (UserEntity user : users) {
+                    if (user.getDocument() == order.getVeterinarian().getDocument()) {
+                        entity.setVeterinarian(user);
+                        break;
+                    }
+                }
             }
         }
         
+        // Save the entity and update the ID in the domain model
         orderRepository.save(entity);
-        
         order.setOrderId(entity.getOrderId());
     }
     

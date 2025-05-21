@@ -1,7 +1,6 @@
 package app.adapters.pets.entity;
 
 import app.adapters.person.entity.PersonEntity;
-import app.domain.models.Person;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

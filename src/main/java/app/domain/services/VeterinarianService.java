@@ -50,26 +50,52 @@ public class VeterinarianService {
     }
 
     public void createMedicalRecord(MedicalRecord medicalRecord) throws Exception {
-        User user = userPort.findByUserId(medicalRecord.getVeterinarian().getDocument());
-        if (user == null || !user.getRole().equals("veterinarian")) {
-            throw new Exception("no existe un usuario con esa cedula.");
-        }
-
-        Order order = orderPort.findByOrderId(medicalRecord.getOrder().getOrderId());
-        if (order == null) {
-            throw new Exception("Esta historia médica no cuenta con una Orden");
-        }
-        
-        Pet pet  = petPort.findByPetId(medicalRecord.getPet().getPetId());
-        if(pet==null){
+        // Verificar que la mascota exista
+        Pet pet = petPort.findByPetId(medicalRecord.getPet().getPetId());
+        if (pet == null) {
             throw new Exception("Esta mascota no existe");
         }
-        if(pet.getPetId() != order.getPet().getPetId()){
-            throw new Exception("Esta mascota no esta asociada a esta orden");
+        
+        // Verificar que el veterinario exista
+        User veterinarian = null;
+        // Primero intentar buscar por ID si está disponible
+        if (medicalRecord.getVeterinarian().getUserId() > 0) {
+            veterinarian = userPort.findByUserId(medicalRecord.getVeterinarian().getUserId());
         }
-        medicalRecord.setVeterinarian(order.getVeterinarian());
-        medicalRecord.setOrder(order);
+        
+        // Luego intentar buscar por documento
+        if (veterinarian == null) {
+            List<User> allUsers = userPort.findAll(); // Necesitarías agregar este método a UserPort
+            for (User user : allUsers) {
+                if (user.getDocument() == medicalRecord.getVeterinarian().getDocument()) {
+                    veterinarian = user;
+                    break;
+                }
+            }
+        }
+        
+        if (veterinarian == null || !veterinarian.getRole().equalsIgnoreCase("Veterinarian")) {
+            throw new Exception("El veterinario no existe o no tiene el rol adecuado");
+        }
+        
+        // Hacer la orden opcional
+        if (medicalRecord.getOrder() != null && medicalRecord.getOrder().getOrderId() > 0) {
+            Order order = orderPort.findByOrderId(medicalRecord.getOrder().getOrderId());
+            if (order == null) {
+                throw new Exception("La orden especificada no existe");
+            }
+            
+            if (pet.getPetId() != order.getPet().getPetId()) {
+                throw new Exception("Esta mascota no está asociada a esta orden");
+            }
+            
+            medicalRecord.setOrder(order);
+        }
+        
+        // Asignar los valores correctos
+        medicalRecord.setVeterinarian(veterinarian);
         medicalRecord.setPet(pet);
+        
         medicalRecordPort.save(medicalRecord);
     }
 
@@ -94,25 +120,46 @@ public class VeterinarianService {
     }
 
     public void createOrder(Order order) throws Exception {
-        User veterinarian = userPort.findByUserId(order.getVeterinarian().getDocument());
-        if (veterinarian == null || !veterinarian.getRole().equals("Veterinarian")) {
+        // Verificar que el veterinario exista
+        User veterinarian = null;
+        // Primero intentar buscar por ID si está disponible
+        if (order.getVeterinarian().getUserId() > 0) {
+            veterinarian = userPort.findByUserId(order.getVeterinarian().getUserId());
+        }
+        
+        // Luego intentar buscar por documento
+        if (veterinarian == null) {
+            List<User> allUsers = userPort.findAll(); // Necesitarías agregar este método a UserPort
+            for (User user : allUsers) {
+                if (user.getDocument() == order.getVeterinarian().getDocument()) {
+                    veterinarian = user;
+                    break;
+                }
+            }
+        }
+        
+        if (veterinarian == null || !veterinarian.getRole().equalsIgnoreCase("Veterinarian")) {
             throw new Exception("El veterinario no existe o no tiene el rol adecuado");
         }
         
+        // Verificar mascota
         Pet pet = petPort.findByPetId(order.getPet().getPetId());
         if (pet == null) {
             throw new Exception("La mascota no existe");
         }
         
+        // Verificar dueño
         Person owner = personPort.findByPersonId(order.getOwner().getDocument());
         if (owner == null) {
             throw new Exception("El dueño no existe");
         }
+        
         if (owner.getDocument() != pet.getOwner().getDocument()) {
             throw new Exception("El dueño no es dueño de esta mascota");
         }
         
-        order.setOrderId(System.currentTimeMillis());
+        // Asignar el veterinario correcto
+        order.setVeterinarian(veterinarian);
         order.setDate(new Timestamp(System.currentTimeMillis()));
         
         orderPort.save(order);
@@ -123,21 +170,42 @@ public class VeterinarianService {
         if (db_order == null) {
             throw new Exception("La orden no existe");
         }
-        if (order.getVeterinarian() == null || userPort.findByUserId(order.getVeterinarian().getDocument()) == null || !order.getVeterinarian().getRole().equals("Veterinarian")) {
+        
+        // Verificar que el veterinario exista
+        User veterinarian = null;
+        // Primero intentar buscar por ID si está disponible
+        if (order.getVeterinarian().getUserId() > 0) {
+            veterinarian = userPort.findByUserId(order.getVeterinarian().getUserId());
+        }
+        
+        // Luego intentar buscar por documento
+        if (veterinarian == null) {
+            List<User> allUsers = userPort.findAll();
+            for (User user : allUsers) {
+                if (user.getDocument() == order.getVeterinarian().getDocument()) {
+                    veterinarian = user;
+                    break;
+                }
+            }
+        }
+        
+        if (veterinarian == null || !veterinarian.getRole().equalsIgnoreCase("Veterinarian")) {
             throw new Exception("Solo un veterinario puede anular órdenes");
         }
         
+        // Marcar la orden como cancelada
+        db_order.setCancelled(true);
+        orderPort.save(db_order);
+        
+        // Crear registro médico de la anulación
         MedicalRecord cancelRecord = new MedicalRecord();
         cancelRecord.setPet(db_order.getPet());
-        cancelRecord.setVeterinarian(order.getVeterinarian());
-
+        cancelRecord.setVeterinarian(veterinarian);
         cancelRecord.setDate(new Timestamp(System.currentTimeMillis()));
         
         cancelRecord.setReason("Anulación de orden #" + db_order.getOrderId());
-        cancelRecord.setProcedureDetails("Orden anulada por " + order.getVeterinarian().getName());
+        cancelRecord.setProcedureDetails("Orden anulada por " + veterinarian.getName());
         cancelRecord.setOrder(db_order);
-        
-        cancelRecord.setMedicalRecordId(System.currentTimeMillis());
         
         medicalRecordPort.save(cancelRecord);
     }

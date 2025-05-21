@@ -67,15 +67,30 @@ public class ConsoleApplication implements CommandLineRunner{
         String password = scanner.nextLine();
         
         try {
-            if (username.equals("admin") && password.equals("admin")) {
-                currentRole = "Administrator";
-                showAdministratorMenu();
-            } else if (username.equals("vet") && password.equals("vet")) {
-                currentRole = "Veterinarian";
-                showVeterinarianMenu();
-            } else if (username.equals("seller") && password.equals("seller")) {
-                currentRole = "Seller";
-                showSellerMenu();
+            // Intentar autenticar usando el servicio
+            User authenticatedUser = administratorService.authenticateUser(username, password);
+            
+            if (authenticatedUser != null) {
+                // Usuario autenticado correctamente
+                currentUser = authenticatedUser;
+                currentRole = authenticatedUser.getRole();
+                
+                System.out.println("Bienvenido, " + authenticatedUser.getName());
+                
+                // Mostrar el menú correspondiente según el rol
+                switch (currentRole) {
+                    case "Administrator":
+                        showAdministratorMenu();
+                        break;
+                    case "Veterinarian":
+                        showVeterinarianMenu();
+                        break;
+                    case "Seller":
+                        showSellerMenu();
+                        break;
+                    default:
+                        System.out.println("Rol no reconocido: " + currentRole);
+                }
             } else {
                 System.out.println("Credenciales incorrectas");
             }
@@ -109,7 +124,6 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.println("\n===== MENU ADMINISTRADOR =====");
             System.out.println("1. Registrar vendedor");
             System.out.println("2. Registrar veterinario");
-            System.out.println("3. Cambiar rol");
             System.out.println("0. Cerrar sesión");
             System.out.print("Seleccione una opción: ");
             
@@ -120,10 +134,6 @@ public class ConsoleApplication implements CommandLineRunner{
                     break;
                 case 2:
                     registerVeterinarian();
-                    break;
-                case 3:
-                    changeRole();
-                    back = true;
                     break;
                 case 0:
                     back = true;
@@ -144,7 +154,6 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.println("4. Anular orden médica");
             System.out.println("5. Consultar historia clínica");
             System.out.println("6. Consultar órdenes");
-            System.out.println("7. Cambiar rol");
             System.out.println("0. Cerrar sesión");
             System.out.print("Seleccione una opción: ");
             
@@ -168,10 +177,6 @@ public class ConsoleApplication implements CommandLineRunner{
                 case 6:
                     consultOrders();
                     break;
-                case 7:
-                    changeRole();
-                    back = true;
-                    break;
                 case 0:
                     back = true;
                     break;
@@ -188,7 +193,6 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.println("1. Vender medicamento por orden");
             System.out.println("2. Vender otro producto");
             System.out.println("3. Consultar órdenes");
-            System.out.println("4. Cambiar rol");
             System.out.println("0. Cerrar sesión");
             System.out.print("Seleccione una opción: ");
             
@@ -202,10 +206,6 @@ public class ConsoleApplication implements CommandLineRunner{
                     break;
                 case 3:
                     consultOrders();
-                    break;
-                case 4:
-                    changeRole();
-                    back = true;
                     break;
                 case 0:
                     back = true;
@@ -230,7 +230,18 @@ public class ConsoleApplication implements CommandLineRunner{
             System.out.print("Contraseña: ");
             String password = scanner.nextLine();
             
-            User seller = new User(document, name, age, username, password, 1235,"Seller");
+            // Primero crear la persona
+            Person person = new Person(document, name, age, "Seller");
+            
+            // Luego crear el usuario relacionado con esa persona
+            User seller = new User();
+            seller.setDocument(document);  // Este es el enlace con la persona
+            seller.setName(name);
+            seller.setAge(age);
+            seller.setUserName(username);
+            seller.setPassword(password);
+            seller.setRole("Seller");
+            
             administratorService.createSeller(seller);
             System.out.println("Vendedor registrado exitosamente");
         } catch (Exception e) {
@@ -239,7 +250,36 @@ public class ConsoleApplication implements CommandLineRunner{
     }
     
     private void registerVeterinarian() {
-        //Pendiente: registrar veterinario
+        try {
+            System.out.println("\n===== REGISTRO DE VETERINARIO =====");
+            System.out.print("Cédula: ");
+            long document = Long.parseLong(scanner.nextLine());
+            System.out.print("Nombre: ");
+            String name = scanner.nextLine();
+            System.out.print("Edad: ");
+            int age = Integer.parseInt(scanner.nextLine());
+            System.out.print("Usuario: ");
+            String username = scanner.nextLine();
+            System.out.print("Contraseña: ");
+            String password = scanner.nextLine();
+            
+            // Primero crear la persona
+            Person person = new Person(document, name, age, "Veterinarian");
+            
+            // Luego crear el usuario relacionado con esa persona
+            User veterinarian = new User();
+            veterinarian.setDocument(document);
+            veterinarian.setName(name);
+            veterinarian.setAge(age);
+            veterinarian.setUserName(username);
+            veterinarian.setPassword(password);
+            veterinarian.setRole("Veterinarian");
+            
+            administratorService.createVeterinarian(veterinarian);
+            System.out.println("Veterinario registrado exitosamente");
+        } catch (Exception e) {
+            System.out.println("Error al registrar veterinario: " + e.getMessage());
+        }
     }
 
     private void registerPet() {
@@ -280,31 +320,354 @@ public class ConsoleApplication implements CommandLineRunner{
     }
 
     private void createMedicalRecord() {
-        // creación de historia clínica
+        try {
+            System.out.println("\n===== CREACIÓN DE HISTORIA CLÍNICA =====");
+            System.out.print("ID de la mascota: ");
+            long petId = Long.parseLong(scanner.nextLine());
+    
+            // Preguntar si desea asociar una orden existente
+            System.out.print("¿Desea asociar esta historia clínica a una orden médica existente? (S/N): ");
+            String hasOrder = scanner.nextLine();
+            
+            // Preparar la orden si el usuario quiere asociarla
+            Order order = null;
+            if (hasOrder.equalsIgnoreCase("S")) {
+                System.out.print("ID de la orden médica: ");
+                long orderId = Long.parseLong(scanner.nextLine());
+                
+                // Verificar que la orden existe
+                Order orderQuery = new Order();
+                orderQuery.setOrderId(orderId);
+                
+                try {
+                    order = sellerService.ConsultOrder(orderQuery);
+                    if (order == null) {
+                        System.out.println("No se encontró la orden especificada. Se creará la historia sin asociar a una orden.");
+                    } else {
+                        System.out.println("Orden encontrada: Medicamento: " + order.getMedicine() + ", Dosis: " + order.getDose());
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error al buscar la orden: " + e.getMessage() + ". Se creará la historia sin asociar a una orden.");
+                    order = null;
+                }
+            }
+    
+            System.out.print("Razón de la visita: ");
+            String reason = scanner.nextLine();
+            System.out.print("Sintomatología: ");
+            String symptomatology = scanner.nextLine();
+            System.out.print("Diagnóstico: ");
+            String diagnostic = scanner.nextLine();
+            System.out.print("Procedimiento: ");
+            String procedure = scanner.nextLine();
+            System.out.print("Medicamento: ");
+            String medicine = scanner.nextLine();
+            System.out.print("Dosis: ");
+            String dose = scanner.nextLine();
+            System.out.print("Vacunación (si aplica): ");
+            String vaccination = scanner.nextLine();
+            System.out.print("Alergias a medicamentos: ");
+            String allergyMedication = scanner.nextLine();
+            System.out.print("Detalles del procedimiento: ");
+            String procedureDetails = scanner.nextLine();
+            
+            // Crear la historia clínica
+            MedicalRecord medicalRecord = new MedicalRecord();
+            Pet pet = new Pet();
+            pet.setPetId(petId);
+            medicalRecord.setPet(pet);
+            medicalRecord.setDate(new Timestamp(System.currentTimeMillis()));
+            medicalRecord.setReason(reason);
+            medicalRecord.setSymptomatology(symptomatology);
+            medicalRecord.setDiagnostic(diagnostic);
+            medicalRecord.setProcedure(procedure);
+            medicalRecord.setMedicine(medicine);
+            medicalRecord.setDose(dose);
+            medicalRecord.setVaccination(vaccination);
+            medicalRecord.setAllergyMedication(allergyMedication);
+            medicalRecord.setProcedureDetails(procedureDetails);
+            medicalRecord.setVeterinarian(currentUser);
+            
+            // Asociar la orden si existe
+            if (order != null) {
+                medicalRecord.setOrder(order);
+            }
+            
+            veterinarianService.createMedicalRecord(medicalRecord);
+            
+            if (order != null) {
+                System.out.println("Historia clínica creada exitosamente y asociada a la orden #" + order.getOrderId());
+            } else {
+                System.out.println("Historia clínica creada exitosamente");
+            }
+        } catch (Exception e) {
+            System.out.println("Error al crear historia clínica: " + e.getMessage());
+        }
     }
 
     private void createOrder() {
-        // creación de orden médica
+        try {
+            System.out.println("\n===== CREACIÓN DE ORDEN MÉDICA =====");
+            System.out.print("ID de la mascota: ");
+            long petId = Long.parseLong(scanner.nextLine());
+            System.out.print("Cédula del dueño: ");
+            long ownerId = Long.parseLong(scanner.nextLine());
+            System.out.print("Medicamento: ");
+            String medicine = scanner.nextLine();
+            System.out.print("Dosis: ");
+            String dose = scanner.nextLine();
+            
+            Order order = new Order();
+            Pet pet = new Pet();
+            pet.setPetId(petId);
+            order.setPet(pet);
+            
+            Person owner = new Person();
+            owner.setDocument(ownerId);
+            order.setOwner(owner);
+            
+            order.setVeterinarian(currentUser);
+            order.setMedicine(medicine);
+            order.setDose(dose);
+            order.setDate(new Timestamp(System.currentTimeMillis()));
+            order.setCancelled(false);
+            
+            veterinarianService.createOrder(order);
+            System.out.println("Orden médica creada exitosamente");
+        } catch (Exception e) {
+            System.out.println("Error al crear orden médica: " + e.getMessage());
+        }
     }
 
     private void cancelOrder() {
-        // anular orden
+        try {
+            System.out.println("\n===== ANULAR ORDEN MÉDICA =====");
+            System.out.print("ID de la orden: ");
+            long orderId = Long.parseLong(scanner.nextLine());
+            
+            // Crear un objeto Order con el ID para anular
+            Order order = new Order();
+            
+            // Usar el usuario actualmente logueado como veterinario
+            order.setVeterinarian(currentUser);
+            order.setOrderId(orderId);
+            
+            veterinarianService.cancelOrder(order);
+            System.out.println("Orden médica anulada exitosamente");
+        } catch (Exception e) {
+            System.out.println("Error al anular orden: " + e.getMessage());
+        }
     }
 
     private void viewMedicalRecords() {
-        // ver historias clínicas
+        try {
+            System.out.println("\n===== CONSULTA DE HISTORIAS CLÍNICAS =====");
+            System.out.print("ID de la mascota: ");
+            long petId = Long.parseLong(scanner.nextLine());
+            
+            // Crear un objeto Pet para la búsqueda
+            Pet pet = new Pet();
+            pet.setPetId(petId);
+            
+            // Usar el método correcto del servicio
+            List<MedicalRecord> records = veterinarianService.searchAllMedicalRecordByPetId(pet);
+            
+            if (records == null || records.isEmpty()) {
+                System.out.println("No se encontraron historias clínicas para esta mascota");
+                return;
+            }
+            
+            System.out.println("\nHistorias Clínicas:");
+            for (MedicalRecord record : records) {
+                System.out.println("======================================");
+                System.out.println("ID: " + record.getMedicalRecordId());
+                System.out.println("Fecha: " + record.getDate());
+                System.out.println("Razón: " + record.getReason());
+                System.out.println("Sintomatología: " + record.getSymptomatology());
+                System.out.println("Diagnóstico: " + record.getDiagnostic());
+                System.out.println("Procedimiento: " + record.getProcedure());
+                System.out.println("Medicamento: " + record.getMedicine());
+                System.out.println("Dosis: " + record.getDose());
+                System.out.println("======================================");
+            }
+        } catch (Exception e) {
+            System.out.println("Error al consultar historias clínicas: " + e.getMessage());
+        }
     }
 
     private void consultOrders() {
-        // consultar órdenes
+        try {
+            System.out.println("\n===== CONSULTA DE ÓRDENES MÉDICAS =====");
+            System.out.print("ID de la orden: ");
+            long orderId = Long.parseLong(scanner.nextLine());
+            
+            // Crear objeto Order para consultar
+            Order orderQuery = new Order();
+            orderQuery.setOrderId(orderId);
+            
+            // Consultar la orden usando el método apropiado
+            Order order = sellerService.ConsultOrder(orderQuery);
+            
+            if (order == null) {
+                System.out.println("No se encontró la orden especificada.");
+                return;
+            }
+            
+            // Mostrar detalles de la orden
+            System.out.println("\nDetalle de la orden:");
+            System.out.println("======================================");
+            System.out.println("ID: " + order.getOrderId());
+            if (order.getPet() != null) {
+                System.out.println("Mascota: " + order.getPet().getName() + " (ID: " + order.getPet().getPetId() + ")");
+            }
+            if (order.getOwner() != null) {
+                System.out.println("Dueño: " + order.getOwner().getName() + " (Cédula: " + order.getOwner().getDocument() + ")");
+            }
+            System.out.println("Fecha: " + order.getDate());
+            System.out.println("Medicamento: " + order.getMedicine());
+            System.out.println("Dosis: " + order.getDose());
+            System.out.println("Estado: " + (order.isCancelled() ? "ANULADA" : "ACTIVA"));
+            System.out.println("======================================");
+            
+        } catch (Exception e) {
+            System.out.println("Error al consultar órdenes: " + e.getMessage());
+        }
     }
 
     private void sellMedicine() {
-        // vender medicamentos
+        try {
+            System.out.println("\n===== VENTA DE MEDICAMENTO POR ORDEN =====");
+            System.out.print("ID de la orden médica: ");
+            long orderId = Long.parseLong(scanner.nextLine());
+            
+            // Crear objeto Order para consulta
+            Order orderQuery = new Order();
+            orderQuery.setOrderId(orderId);
+            
+            // Consultar orden
+            Order order = sellerService.ConsultOrder(orderQuery);
+            
+            if (order == null) {
+                System.out.println("No se encontró la orden médica especificada.");
+                return;
+            }
+            
+            if (order.isCancelled()) {
+                System.out.println("Esta orden médica ha sido anulada y no se puede procesar.");
+                return;
+            }
+            
+            // Mostrar detalles de la orden
+            System.out.println("\nDetalle de la orden:");
+            if (order.getPet() != null) {
+                System.out.println("Mascota: " + order.getPet().getName());
+            }
+            if (order.getOwner() != null) {
+                System.out.println("Dueño: " + order.getOwner().getName());
+            }
+            System.out.println("Medicamento: " + order.getMedicine());
+            System.out.println("Dosis: " + order.getDose());
+            
+            // Confirmar venta
+            System.out.print("\n¿Confirmar venta del medicamento? (S/N): ");
+            String confirm = scanner.nextLine();
+            
+            if (!confirm.equalsIgnoreCase("S")) {
+                System.out.println("Venta cancelada.");
+                return;
+            }
+            
+            // Solicitar cantidad y valor
+            System.out.print("Cantidad: ");
+            int amount = Integer.parseInt(scanner.nextLine());
+            System.out.print("Valor unitario: ");
+            double value = Double.parseDouble(scanner.nextLine());
+            
+            // Crear la factura
+            Bill bill = new Bill();
+            bill.setPetId(order.getPet());
+            bill.setOrderId(order);
+            bill.setProductName(order.getMedicine());
+            bill.setValue(value);
+            bill.setAmount(amount);
+            
+            // Vender el medicamento usando la orden y la factura
+            sellerService.SellMedicine(order, bill);
+            
+            // Mostrar resumen
+            double total = value * amount;
+            System.out.println("\n===== RESUMEN DE VENTA =====");
+            System.out.println("Producto: " + order.getMedicine());
+            System.out.println("Cantidad: " + amount);
+            System.out.println("Valor unitario: $" + value);
+            System.out.println("Total: $" + total);
+            System.out.println("Venta registrada exitosamente con ID: " + bill.getBillId());
+            
+        } catch (Exception e) {
+            System.out.println("Error al vender medicamento: " + e.getMessage());
+        }
     }
 
     private void sellOtherProduct() {
-        // vender otros productos
+        try {
+            System.out.println("\n===== VENTA DE OTRO PRODUCTO =====");
+            
+            // Solicitar datos de la mascota
+            System.out.print("¿Asociar a una mascota? (S/N): ");
+            String hasPet = scanner.nextLine();
+            
+            Pet pet = null;
+            if (hasPet.equalsIgnoreCase("S")) {
+                System.out.print("ID de la mascota: ");
+                long petId = Long.parseLong(scanner.nextLine());
+                
+                // Crear objeto Pet para buscar
+                pet = new Pet();
+                pet.setPetId(petId);
+            }
+            
+            // Solicitar datos del producto
+            System.out.print("Nombre del producto: ");
+            String productName = scanner.nextLine();
+            System.out.print("Cantidad: ");
+            int amount = Integer.parseInt(scanner.nextLine());
+            System.out.print("Valor unitario: ");
+            double value = Double.parseDouble(scanner.nextLine());
+            
+            // Confirmar venta
+            double total = value * amount;
+            System.out.println("\nTotal a pagar: $" + total);
+            System.out.print("¿Confirmar venta? (S/N): ");
+            String confirm = scanner.nextLine();
+            
+            if (!confirm.equalsIgnoreCase("S")) {
+                System.out.println("Venta cancelada.");
+                return;
+            }
+            
+            // Crear la factura
+            Bill bill = new Bill();
+            if (pet != null) {
+                bill.setPetId(pet);
+            }
+            bill.setProductName(productName);
+            bill.setValue(value);
+            bill.setAmount(amount);
+            
+            // Usar el método correcto para vender otro producto
+            sellerService.sellOtherProduct(bill);
+            
+            // Mostrar resumen
+            System.out.println("\n===== RESUMEN DE VENTA =====");
+            System.out.println("Producto: " + productName);
+            System.out.println("Cantidad: " + amount);
+            System.out.println("Valor unitario: $" + value);
+            System.out.println("Total: $" + total);
+            System.out.println("Venta registrada exitosamente con ID: " + bill.getBillId());
+            
+        } catch (Exception e) {
+            System.out.println("Error al vender producto: " + e.getMessage());
+        }
     }
 
     private int readIntOption() {
@@ -312,36 +675,6 @@ public class ConsoleApplication implements CommandLineRunner{
             return Integer.parseInt(scanner.nextLine());
         } catch (NumberFormatException e) {
             return -1; // Valor inválido
-        }
-    }
-
-    private void changeRole() {
-        System.out.println("\n===== CAMBIO DE ROL =====");
-        System.out.println("1. Administrador");
-        System.out.println("2. Veterinario");
-        System.out.println("3. Vendedor");
-        System.out.print("Seleccione un rol: ");
-        
-        int option = readIntOption();
-        try {
-            switch (option) {
-                case 1:
-                    currentRole = "Administrator";
-                    showAdministratorMenu();
-                    break;
-                case 2:
-                    currentRole = "Veterinarian";
-                    showVeterinarianMenu();
-                    break;
-                case 3:
-                    currentRole = "Seller";
-                    showSellerMenu();
-                    break;
-                default:
-                    System.out.println("Opción inválida.");
-            }
-        } catch (Exception e) {
-            System.out.println("Error al cambiar de rol: " + e.getMessage());
         }
     }
 }
